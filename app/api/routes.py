@@ -137,31 +137,4 @@ def get_documentation():
         }
     })
 
-@api.route('/create-admin', methods=['POST'])
-@admin_required
-def create_admin():
-    data = request.get_json()
-    if not data or 'username' not in data or 'password' not in data:
-        return jsonify({'error': 'Missing username or password'}), 400
-    
-    db = get_db()
-    cursor = db.cursor()
-    
-    # Check if username exists
-    cursor.execute('SELECT * FROM users WHERE username = ?', (data['username'],))
-    if cursor.fetchone():
-        db.close()
-        return jsonify({'error': 'Username already exists'}), 400
-    
-    # Create new admin user
-    salt = secrets.token_hex(16)
-    password_hash = hashlib.sha256((data['password'] + salt).encode()).hexdigest()
-    
-    cursor.execute('''
-        INSERT INTO users (username, password_hash, salt, is_admin)
-        VALUES (?, ?, ?, 1)
-    ''', (data['username'], password_hash, salt))
-    
-    db.commit()
-    db.close()
-    return jsonify({'message': 'Admin user created successfully'}) 
+ 
